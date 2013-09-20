@@ -1,29 +1,20 @@
 module MCollective
   module Agent
     class Varnish<RPC::Agent
-      action "purgeurl" do
+      action "purge" do
+        url_to_purge = request[:url] 
+        File.open("/tmp/teste","w") do |file|
+          file.write(url_to_purge)
+        end
+        reply[:urlpurged] = url_to_purge
       end
 
-      action "purgeregex" do
-      end
-
-      action "vcl" do
-      end
-
-      action "stats" do
-      end
-
-      action "start" do
-      end
-
-      action "stop" do
-      end
-
-      action "restart" do
-      end
-
-      action "reload" do
-      end
+#      action "vcl" do
+#      end
+#
+#      action "stats" do
+#      end
+#
 
     end
   end

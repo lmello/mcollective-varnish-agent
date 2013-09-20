@@ -4,41 +4,30 @@ metadata :name => "varnish",
          :license => "ASL 2.0",
          :version => "0.1",
          :url => "http://github.com/lmello/mcollective-varnish-agent",
-         :timeout => %TIMEOUT%
+         :timeout => 5
 
-action "purgeurl", :description => "Purge the specified url from varnish cache" do
+action "purge", :description => "Purge the specified url from varnish cache" do
      # Example Input
-     input :name,
-           :prompt => "%PROMPT%",
-           :description => "Purge the specified url from varnish cache",
-           :type => %TYPE%,
-           :validation => '%VALIDATION%',
-           :optional => %OPTIONAL%,
-           :maxlength => %MAXLENGTH%
+     input :url,
+           :prompt => "URL to be purged",
+           :description => "The complete url you want to purge\n ex: http://example.com/images/image2.jpg",
+           :type => :string,
+           :validation => '^http:\/\/.*$',
+           :optional => false,
+           :maxlength => 250
 
      # Example output
-     output :name,
-            :description => "%DESCRIPTION%",
-            :display_as => "%DISPLAYAS%"
+     output :error,
+            :description => "Reason for failure described in status",
+            :display_as => "error",
+            :default => ""
+     output :urlpurged,
+            :description => "URL purged",
+            :display_as => "purged"
 end
 
-action "purgeregex", :description => "Purge varnish cache using regular expressions" do
-end
-
-action "vcl", :description => "Command to reload or show the varnish vcl" do
-end
-
-action "stats", :description => "Get some statistics from the varnish server" do
-end
-
-action "start", :description => "Start the varnish service" do
-end
-
-action "stop", :description => "Stop the varnish service" do
-end
-
-action "restart", :description => "Restart the varnish service" do
-end
-
-action "reload", :description => "Reload the vcl" do
-end
+#action "vcl", :description => "Command to reload or show the varnish vcl" do
+#end
+#
+#action "stats", :description => "Get some statistics from the varnish server" do
+#end
