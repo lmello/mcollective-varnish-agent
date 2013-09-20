@@ -1,6 +1,9 @@
 mcollective-varnish-agent
 =========================
 
+THIS IS IN DEVELOPMENT, AND DOES NOT WORK YET. FEEL FREE TO HELP
+================================================================
+
 Description 
 
 I was tired of having to write scripts and web interfaces that just do not 
@@ -29,11 +32,11 @@ I hope that in near future this mcollective varnish agent will support:
 
 Example Usage: 
 
-$mco varnish purgeurl http://domainname/url
+$mco varnish purge url http://domainname/url
 
 /* use varnishadm ban req.http.host == 'domainname' && req.url == "url"   */ 
 
-$mco varnish purgeregex "^/images/.*$"
+$mco varnish purge regex "^/images/.*$"
 
 /* use varnishadm ban.url "^/images/.*$" */ 
 
