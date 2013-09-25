@@ -57,6 +57,7 @@ describe "varnish agent" do
         result.should have_data_items(:urlpurged => url_to_purge)
       end
     end
+
     context "with debug enabled on varnish 2" do 
       it "should return the purge command" do 
          url_to_purge = "http://example.com/images/image.jpg"

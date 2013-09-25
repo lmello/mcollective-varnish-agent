@@ -10,7 +10,9 @@ module MCollective
         v_version = discover_varnish_version
         purge_cmd = create_purge_command(v_version, uri, hostname)
         self.run(purge_cmd)
-        reply[:purge_cmd] = purge_cmd
+        if request.include?(:debug) 
+          reply[:purge_cmd] = purge_cmd
+        end
         reply[:urlpurged] = url_to_purge
       end
       def self.run(cmd) 
