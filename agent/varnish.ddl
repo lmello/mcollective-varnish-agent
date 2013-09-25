@@ -15,6 +15,12 @@ action "purge", :description => "Purge the specified url from varnish cache" do
            :validation => '^http:\/\/.*$',
            :optional => false,
            :maxlength => 250
+     input :debug, 
+           :prompt => "Use debug",
+           :description => "Enable debug, default: false",
+           :type => :boolean,
+           :optional => :true
+           
 
      # Example output
      output :error,
@@ -24,6 +30,9 @@ action "purge", :description => "Purge the specified url from varnish cache" do
      output :urlpurged,
             :description => "URL purged",
             :display_as => "purged"
+     output :purge_cmd,
+            :description => "Command used to purge",
+            :display_as => "purge_cmd"
 end
 
 #action "vcl", :description => "Command to reload or show the varnish vcl" do
