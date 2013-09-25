@@ -9,22 +9,38 @@ describe "varnish agent" do
     @agent = MCollective::Test::LocalAgentTest.new("varnish", :agent_file => agent_file).plugin
   end
 
-  describe "purge" do
-    it "should fail if didn't received url as parameter " do
-      result = @agent.call(:purge)
-      result.should_not be_successful
+  describe "#purge" do
+    context "without url parameter" do
+      it "should fail" do
+        result = @agent.call(:purge)
+        result.should_not be_successful
+      end
+    end 
+    context "without a valid url" do
+      it "should fail" do
+        result = @agent.call(:purge, :url => "asdase412356/sdkfs")
+        result.should_not be_successful
+      end
     end
-
-    it "should fail if received invalid url as parameter" do
-      result = @agent.call(:purge, :url => "asdase412356/sdkfs")
-      result.should_not be_successful
+    context "with a valid url" do
+      it "should be successful " do 
+        url_to_purge = "http://example.com/images/image.jpg"
+        result = @agent.call(:purge, :url=> url_to_purge) 
+        result.should be_successful
+      end
+      it "should return purged url" do 
+        url_to_purge = "http://example.com/images/image.jpg"
+        result = @agent.call(:purge, :url=> url_to_purge) 
+        result.should have_data_items(:urlpurged => url_to_purge)
+      end
     end
-
-    it "should return the url that was purged" do 
-      url_to_purge = "http://example.com/images/image.jpg"
-      result = @agent.call(:purge, :url=> url_to_purge) 
-      result.should have_data_items(:urlpurged => url_to_purge)
-    end
-   
+    #context "with debug enabled" do 
+    #  it "should return the command used to purge" do 
+    #     url_to_purge = "http://example.com/images/image.jpg"
+    #     result = @agent.call(:purge, :url=> url_to_purge)
+    #     purge_cmd = "/usr/bin/varnishadm -S /etc/varnish/secret -T 127.0.0.1:6082 " + " purge.url \"^/images/image.jpg$\"".shellescape
+    #     result.should have_data_items(:purgecmd => "#{purge_cmd}", :urlpurged => url_to_purge)
+    #  end
+    #end
   end
 end
