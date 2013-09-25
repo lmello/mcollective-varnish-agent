@@ -3,9 +3,10 @@ module MCollective
     class Varnish<RPC::Agent
       action "purge" do
         url_to_purge = request[:url] 
-        File.open("/tmp/teste","w") do |file|
-          file.write(url_to_purge)
-        end
+        parsed_url = URI.parse(url_to_purge)
+        fail "Invalid Url" unless parsed_url.scheme == "http"
+        hostname = parsed_url.host
+        uri = parsed_url.request_uri
         reply[:urlpurged] = url_to_purge
       end
 

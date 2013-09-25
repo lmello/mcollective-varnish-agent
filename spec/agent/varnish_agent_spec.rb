@@ -23,7 +23,6 @@ describe "varnish agent" do
     it "should return the url that was purged" do 
       url_to_purge = "http://example.com/images/image.jpg"
       result = @agent.call(:purge, :url=> url_to_purge) 
-      raise result.inspect
       result.should have_data_items(:urlpurged => url_to_purge)
     end
    
