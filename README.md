@@ -1,15 +1,15 @@
 mcollective-varnish-agent
 =========================
 
-THIS IS IN DEVELOPMENT, AND DOES NOT WORK YET. FEEL FREE TO HELP
-================================================================
+THIS IS IN DEVELOPMENT, FEEL FREE TO HELP
+==========================================
 
 Description 
 
 I was tired of having to write scripts and web interfaces that just do not 
 scale to purging tens or hundreds varnish servers. 
 
-So I had decided to use the publisher, subscriber aproach, and found that
+I had decided to use the publisher, subscriber aproach, and found that
 one mcollective varnish agent plugin would be THE WAY to do it. 
 
 I had searched for a mcollective varnish agent, without success, 
@@ -32,10 +32,15 @@ I hope that in near future this mcollective varnish agent will support:
 
 Example Usage: 
 
-$mco varnish purge url http://domainname/url
+CURRENT WORKING COMMANDS: 
 
-/* use varnishadm ban req.http.host == 'domainname' && req.url == "url"   */ 
 
+$mco rpc varnish purge url=http://domainname/url/image.jpg
+
+/* use varnishadm to purge the url.   */ 
+
+
+-------------COMMANDS BELLOW  DOES NOT WORK YET --------------
 $mco varnish purge regex "^/images/.*$"
 
 /* use varnishadm ban.url "^/images/.*$" */ 
