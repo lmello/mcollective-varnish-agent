@@ -26,9 +26,6 @@ module MCollective
         unless command_status == 0
           fail "Error while running command: #{cmd}"
         end
-        File.open("/tmp/teste","w") do |file| 
-          file.puts("#{cmd}")
-        end
         Log.warn("Command output: #{command_output}")
         return command_output
       end
