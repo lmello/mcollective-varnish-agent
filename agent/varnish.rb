@@ -7,33 +7,33 @@ module MCollective
         fail "Invalid Url" unless parsed_url.scheme == "http"
         hostname = parsed_url.host
         uri = parsed_url.request_uri
-        Log.warn("URL parsed: #{hostname} ,  #{uri}")
+        Log.debug("URL parsed: #{hostname} ,  #{uri}")
         v_version = discover_varnish_version
-        Log.warn("Varnish version discovered: #{v_version}")
+        Log.debug("Varnish version discovered: #{v_version}")
         purge_cmd = create_purge_command(v_version, uri, hostname)
-        Log.warn("Purge cmd: #{purge_cmd}")
+        Log.debug("Purge cmd: #{purge_cmd}")
         purge_output = run(purge_cmd)
-        Log.warn("purge command run.... #{purge_output}")
+        Log.debug("purge command run.... #{purge_output}")
         if request.include?(:debug) 
           reply[:purge_cmd] = purge_cmd
         end
         reply[:urlpurged] = url_to_purge
       end
       def run(cmd) 
-        Log.warn("Running command: #{cmd}")
+        Log.debug("Running command: #{cmd}")
         command_output = `#{cmd}`
         command_status = $?
         unless command_status == 0
           fail "Error while running command: #{cmd}"
         end
-        Log.warn("Command output: #{command_output}")
+        Log.debug("Command output: #{command_output}")
         return command_output
       end
       def discover_varnish_version
         varnishd_output = run("/usr/sbin/varnishd -V 2>&1")
-        Log.warn("Varnishd -V output: #{varnishd_output}")
+        Log.debug("Varnishd -V output: #{varnishd_output}")
         if varnishd_output =~ /varnish-(\d)/
-          Log.warn("Varnishd detected version #{$1}")
+          Log.debug("Varnishd detected version #{$1}")
           version=$1.to_i
           return version
         else 
@@ -42,7 +42,7 @@ module MCollective
       end
       
       def create_purge_command(varnish_version, uri, hostname)
-        Log.warn("Varnish Version: #{varnish_version}, uri: #{uri}, hostname: #{hostname}")
+        Log.debug("Varnish Version: #{varnish_version}, uri: #{uri}, hostname: #{hostname}")
         if varnish_version == 2
           purge_method = "purge.url"
         elsif varnish_version == 3
