@@ -2,29 +2,34 @@ module MCollective
   module Util
     module Varnish
       class Base
-        def initialize
-          @commands = Hash.new
-          @files = Hash.new 
-          command_hash = {"stat_cmd" => "varnishstat", "adm_cmd" => "varnishadm", 
-            "top_cmd" => "varnishtop", "log_cmd" => "logger" }
-          file_hash = {"default_vcl_file" => "/etc/varnish/default.vcl", "secret_file" => "/etc/varnish/secret" }
-          @commands = configure(command_hash)
-          @files = configure(file_hash)
+        attr_reader :initialized, :varnish_version
+        alias initialized? initialized
+        def initialize(*args)
+          @initialized = true
         end
 
-        def configure(config_hash)
-          output = Hash.new
-          config_hash.each do |key, value| 
-            output[key] = Config.instance.pluginconf.fetch("varnish.#{key}", `which #{value}`.chomp)
-            if key =~ /cmd/  #commands must have cmd in key name
-              raise "Could not find #{value} command" unless File.executable?(@commands[key])
-            elsif key =~ /file/ #files must have file in key name 
-              raise "Could not find #{value} file" unless File.exists?(@files[key])
-            else 
-              raise "Config hash have key #{key}, but it only support key name with cmd or file." 
-            end
-            output
+
+        def run(cmd)
+          command_output = `#{cmd}`
+          fail "Could not run command: #{cmd}." unless $?.success? 
+          return command_output
+        end
+        
+        def discover_varnish_version
+          version_output = run("/usr/sbin/varnishd -V 2>&1")
+          if version_output =~ /varnish-(\d)/ and [2,3].include?($1.to_i)
+            @varnish_version = $1.to_i
+          else 
+            raise "Could not detect valid varnish version."
+          end
+        end
+
+        def parse_url(url)
+          parsed = URI.parse(url)
+          unless parsed.scheme == "http"
+            raise ArgumentError, "#parse_url require full http url as parameter"
           end 
+          [parsed.host, parsed.request_uri]
         end
       end
     end
