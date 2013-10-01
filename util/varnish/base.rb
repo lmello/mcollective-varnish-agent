@@ -5,6 +5,7 @@ module MCollective
         attr_reader :initialized, :varnish_version, :cmd_and_files
         alias initialized? initialized
         def initialize(*args)
+          @varnish_version = discover_varnish_version
           @initialized = true
         end
 
@@ -18,7 +19,7 @@ module MCollective
         def discover_varnish_version
           version_output = run("/usr/sbin/varnishd -V 2>&1")
           if version_output =~ /varnish-(\d)/ and [2,3].include?($1.to_i)
-            @varnish_version = $1.to_i
+            $1.to_i
           else 
             raise "Could not detect valid varnish version."
           end
