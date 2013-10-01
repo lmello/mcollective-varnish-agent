@@ -14,71 +14,76 @@ module MCollective
           end
         end
 
-        context "#run" do 
-          it "without cmd it raises error" do
-            @base = Base.new
-            expect{@base.run}.to raise_error ArgumentError
+        context "#run" do
+          context "without parameter" do  
+            it "raises error" do
+              @base = Base.new
+              expect{@base.run}.to raise_error ArgumentError
+            end 
           end 
-
-          it "accept cmd to run" do 
-            Base.any_instance.expects(:`).with("foo").returns("foo_output") 
-            $?.expects(:success?).once.returns(true)
-            @base = Base.new
-            @base.run("foo")
-          end
-          it "raise when cmd fails" do 
-            Base.any_instance.expects(:`).with("foo").returns("foo: command not found") 
-            $?.expects(:success?).once.returns(false)
-            @base = Base.new
-            expect{@base.run("foo")}.to raise_error RuntimeError, "Could not run command: foo."
-          end
-          it "return command output" do 
-            Base.any_instance.expects(:`).with("foo").returns("foo_output") 
-            $?.expects(:success?).once.returns(true)
-            @base = Base.new
-            result = @base.run("foo")
-            result.should == "foo_output"
+          context "with parameter" do 
+            context "when cmd fails" do
+              it "raises error" do 
+                Base.any_instance.expects(:`).with("foo").returns("foo: command not found") 
+                $?.expects(:success?).once.returns(false)
+                @base = Base.new
+                expect{@base.run("foo")}.to raise_error RuntimeError, "Could not run command: foo."
+              end
+            end
+            context "when cmd succeed" do 
+              it "return cmd output" do 
+                Base.any_instance.expects(:`).with("foo").returns("foo_output") 
+                $?.expects(:success?).once.returns(true)
+                @base = Base.new
+                result = @base.run("foo")
+                result.should == "foo_output"
+              end
+            end
           end
         end 
         context "#discover_varnish_version" do 
-          it "raises error when not found" do 
-            Base.any_instance.expects(:`).with("/usr/sbin/varnishd -V 2>&1").returns("varnishd: command not found")
-            $?.expects(:success?).once.returns(false)
-            @base = Base.new
-            expect{@base.discover_varnish_version}.to raise_error RuntimeError, "Could not run command: /usr/sbin/varnishd -V 2>&1."
+          context "when can't find varnishd" do
+            it "raises error" do 
+              Base.any_instance.expects(:`).with("/usr/sbin/varnishd -V 2>&1").returns("varnishd: command not found")
+              $?.expects(:success?).once.returns(false)
+              @base = Base.new
+              expect{@base.discover_varnish_version}.to raise_error RuntimeError, "Could not run command: /usr/sbin/varnishd -V 2>&1."
+            end
+          end
+          context "when version is not 2 or 3" do 
+            it "raises error" do 
+              Base.any_instance.expects(:`).with("/usr/sbin/varnishd -V 2>&1").returns("varnishd (varnish-1.0.0 )")
+              $?.expects(:success?).once.returns(true)
+              @base = Base.new
+              expect{@base.discover_varnish_version}.to raise_error RuntimeError, "Could not detect valid varnish version."
+            end
+          end
+          context "when version is 2" do
+            it "return 2" do 
+              Base.any_instance.expects(:`).with("/usr/sbin/varnishd -V 2>&1").returns("varnishd (varnish-2.1.5 )")
+              $?.expects(:success?).once.returns(true)
+              @base = Base.new
+              @base.discover_varnish_version.should == 2
+            end
           end
 
-          it "raises error when version not 2 or 3" do 
-            Base.any_instance.expects(:`).with("/usr/sbin/varnishd -V 2>&1").returns("varnishd (varnish-1.0.0 )")
-            $?.expects(:success?).once.returns(true)
-            @base = Base.new
-            expect{@base.discover_varnish_version}.to raise_error RuntimeError, "Could not detect valid varnish version."
+          context "when version is 3" do
+            it "return 3" do 
+              Base.any_instance.expects(:`).with("/usr/sbin/varnishd -V 2>&1").returns("varnishd (varnish-3.0.4 )")
+              $?.expects(:success?).once.returns(true)
+              @base = Base.new
+              @base.discover_varnish_version.should == 3
+            end
           end
-
-
-          it "return varnish version 2" do 
-            Base.any_instance.expects(:`).with("/usr/sbin/varnishd -V 2>&1").returns("varnishd (varnish-2.1.5 )")
-            $?.expects(:success?).once.returns(true)
-            @base = Base.new
-            @base.discover_varnish_version.should == 2
-
-          end
-
-          it "return varnish version 3" do 
-            Base.any_instance.expects(:`).with("/usr/sbin/varnishd -V 2>&1").returns("varnishd (varnish-3.0.4 )")
-            $?.expects(:success?).once.returns(true)
-            @base = Base.new
-            @base.discover_varnish_version.should == 3
-          
-          end
-
-          it "creates @varnish_version" do 
-            Base.any_instance.expects(:`).with("/usr/sbin/varnishd -V 2>&1").returns("varnishd (varnish-2.1.5 )")
-            $?.expects(:success?).once.returns(true)
-            @base = Base.new
-            @base.discover_varnish_version
-            @base.varnish_version.should == 2
-
+          context "when successful" do
+            it "creates @varnish_version" do 
+              Base.any_instance.expects(:`).with("/usr/sbin/varnishd -V 2>&1").returns("varnishd (varnish-2.1.5 )")
+              $?.expects(:success?).once.returns(true)
+              @base = Base.new
+              @base.discover_varnish_version
+              expect{@base.responds_to?(:varnish_version)}.to be_true
+              @base.varnish_version.should == 2
+            end
           end
         end
         context "#parse_url" do 
@@ -107,6 +112,67 @@ module MCollective
             end
           end
         end
+        context "#configure" do
+          context "without any parameter" do
+            it "raises error" do
+              @base = Base.new
+              expect{@base.configure}.to raise_error ArgumentError
+            end
+          end
+          context "without hash parameter" do 
+            parameters = {"nil"=> nil, "array" => [1,2], "string" => "test", "number" => 3, "undefined" => :undef}
+            parameters.each do |type,parameter|
+              it "#{type} raises error" do
+                @base = Base.new
+                expect{@base.configure(parameter)}.to raise_error ArgumentError, "#configure argument must be hash"
+              end
+            end
+          end
+          context "with hash parameter" do 
+            context "Correct hash cmd keys" do 
+              it "return default value" do 
+                @base = Base.new 
+                parameter = {"stat_cmd" => "/usr/bin/varnishstat", "daemon_cmd" => "/usr/sbin/varnishd"} 
+                @base.configure(parameter) 
+                @base.cmd_and_files.should == parameter
+              end
+              #it "return config value" do 
+              #  
+              #end
+            end
+
+            context "Correct hash file keys" do
+              it "return default value" do 
+                @base = Base.new 
+                parameter = {"default_vcl_file" => "/usr/bin/varnishstat", "secret_file" => "/usr/sbin/varnishd"} 
+                @base.configure(parameter) 
+                @base.cmd_and_files.should == parameter
+              end
+              #it "return config value" do 
+              #
+              #end
+            end
+            context "Correct hash cmd and file keys" do 
+              it "return default value" do 
+                @base = Base.new 
+                parameter = {"stat_cmd" => "/usr/bin/varnishstat", "daemon_cmd" => "/usr/sbin/varnishd", "default_vcl_file" => "/usr/bin/varnishstat", "secret_file" => "/usr/sbin/varnishd"} 
+                @base.configure(parameter) 
+                @base.cmd_and_files.should == parameter
+              end
+             # it "return config value" do 
+             # 
+             # end
+            end
+            context "invalid hash keys" do 
+              it "raises error" do 
+                @base = Base.new 
+                parameter = {"stat_cmd" => "/usr/bin/varnishstat", "secret_file" => "/usr/sbin/varnishd", "invalid_hash_key" => "/usr/varnish/invalid.txt"} 
+                expect{@base.configure(parameter)}.to raise_error ArgumentError, "#configure does not support hash key: invalid_hash_key"
+              end
+            end
+          end
+        end
+
       end
     end
   end

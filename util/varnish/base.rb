@@ -2,7 +2,7 @@ module MCollective
   module Util
     module Varnish
       class Base
-        attr_reader :initialized, :varnish_version
+        attr_reader :initialized, :varnish_version, :cmd_and_files
         alias initialized? initialized
         def initialize(*args)
           @initialized = true
@@ -30,6 +30,21 @@ module MCollective
             raise ArgumentError, "#parse_url require full http url as parameter"
           end 
           [parsed.host, parsed.request_uri]
+        end
+        
+        def configure(config_hash)
+          raise ArgumentError, "#configure argument must be hash" unless config_hash.is_a?(Hash)
+          output_hash = Hash.new
+          config_hash.each do |key, value| 
+            if key =~ /_cmd$/ 
+              output_hash[key] = value
+            elsif key =~ /_file$/ 
+              output_hash[key] = value
+            else
+              raise ArgumentError, "#configure does not support hash key: #{key}"
+            end
+          end
+          @cmd_and_files = output_hash
         end
       end
     end
